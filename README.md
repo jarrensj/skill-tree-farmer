@@ -54,5 +54,6 @@ open [http://localhost:3000](http://localhost:3000) with your browser
 | Field | Type | Description |
 |-------|------|-------------|
 | name | string | skill tree name |
+| slug | string | url-friendly version of the name |
 | description | string | skill tree description |
 | image | string | image url / path |
