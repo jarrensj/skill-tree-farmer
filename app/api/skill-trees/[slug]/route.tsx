@@ -8,10 +8,10 @@ const supabase = createClient(
 
 // get a skill tree by slug
 export async function GET(
-  req: NextRequest,
-  context: { params: { slug: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = context.params;
+  const { slug } = await params;
 
   try {
     const { data, error } = await supabase
@@ -19,15 +19,15 @@ export async function GET(
       .select('*')
       .eq('slug', slug)
       .maybeSingle();
-    
+
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
+
     if (!data) {
       return NextResponse.json({ error: "Skill tree not found" }, { status: 404 });
     }
-    
+
     return NextResponse.json({ skill_tree: data });
   } catch (error) {
     console.error('Error fetching skill tree:', error);
