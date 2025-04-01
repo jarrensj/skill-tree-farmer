@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { WebhookEvent, UserJSON } from "@clerk/nextjs/server";
 import { Webhook } from "svix";
 
-// Types for our database operations
 type UserData = {
   id: string;
   clerk_id: string;
@@ -14,7 +13,6 @@ type UserData = {
   last_seen: string;
 };
 
-// Verify environment variables are set
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL');
 }
@@ -25,26 +23,20 @@ if (!process.env.CLERK_WEBHOOK_SECRET) {
   throw new Error('Missing CLERK_WEBHOOK_SECRET');
 }
 
-// Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// Initialize webhook secret after verification
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET as string;
 
 export async function POST(request: Request) {
   try {
-    // Get the webhook payload
     const payload = await request.text();
-    
-    // Get the headers
     const svix_id = request.headers.get("svix-id");
     const svix_timestamp = request.headers.get("svix-timestamp");
     const svix_signature = request.headers.get("svix-signature");
 
-    // Verify webhook headers
     if (!svix_id || !svix_timestamp || !svix_signature) {
       return NextResponse.json(
         { error: "Missing required Svix headers" },
@@ -52,7 +44,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify webhook signature
     const wh = new Webhook(WEBHOOK_SECRET);
     let evt: WebhookEvent;
     
