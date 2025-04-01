@@ -27,12 +27,14 @@ open [http://localhost:3000](http://localhost:3000) with your browser
 | Field | Type | Description |
 |-------|------|-------------|
 | id | unique | |
-| name | string | node name |
+| name | string | node name ("left crossover") |
 | description | string | node description |
 | image | string | image url / path |
-| children | array | nodes that are unlocked from the parent (this node) |
+| children | array of node_identifiers | nodes that are unlocked from the parent (this node) |
 | prereq | array | prerequisites before marking as complete |
 | skill_tree_slug | string | associated skill tree identifier |
+| node_identifier | string | identifier for the node ("left_crossover") |
+
 
 **notes:**
 - the `children` field is used to create the skill tree structure
@@ -43,7 +45,7 @@ open [http://localhost:3000](http://localhost:3000) with your browser
 | Field | Type | Description |
 |-------|------|-------------|
 | user_id | string | user identifier |
-| skill_tree_slug | string | associated skill tree |
+| skill_tree_slug | string | associated skill tree identifier |
 | nodes_unlocked | array | list of their unlocked nodes |
 
 **notes:**
