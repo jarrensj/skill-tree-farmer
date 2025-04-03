@@ -59,3 +59,4 @@ open [http://localhost:3000](http://localhost:3000) with your browser
 | slug | string | url-friendly version of the name |
 | description | string | skill tree description |
 | image | string | image url / path |
+| category | string[] | categories that this skill tree belongs to |
