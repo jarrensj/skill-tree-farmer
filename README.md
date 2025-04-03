@@ -34,6 +34,7 @@ open [http://localhost:3000](http://localhost:3000) with your browser
 | prereq | array | prerequisites before marking as complete |
 | skill_tree_slug | string | associated skill tree identifier |
 | node_identifier | string | identifier for the node ("left_crossover") |
+| exp | int | experience points reward for completing this node |
 
 
 **notes:**
