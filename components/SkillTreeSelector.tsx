@@ -9,6 +9,7 @@ interface SkillTree {
   slug: string;
   description: string;
   image: string;
+  category?: string[];
 }
 
 interface Node {
@@ -20,6 +21,7 @@ interface Node {
   children: string[];
   prereq: string[];
   skill_tree_slug: string;
+  exp: number;
 }
 
 export default function SkillTreeSelector() {

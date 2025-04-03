@@ -11,6 +11,7 @@ interface Node {
   children: string[] | null;
   prereq: string[] | null;
   skill_tree_slug: string;
+  exp: number;
 }
 
 interface NodesDisplayProps {
