@@ -259,11 +259,17 @@ export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps
                     ${isSelected
                       ? 'border-blue-500 animate-[pulseBlue_2s_ease-in-out_infinite]'
                       : isUnlocked 
-                        ? 'border-green-500 bg-white' 
+                        ? 'border-green-500' 
                         : isAvailable 
-                          ? 'border-yellow-500 bg-gray-100 cursor-pointer' 
-                          : 'border-gray-300 bg-gray-200'
+                          ? 'border-yellow-500' 
+                          : 'border-gray-300'
                     } 
+                    ${isUnlocked 
+                      ? 'bg-green-50' 
+                      : isAvailable 
+                        ? 'bg-yellow-50'
+                        : 'bg-gray-200'
+                    }
                     hover:shadow-lg transition-all duration-300 p-2 
                     flex flex-col items-center justify-center 
                     ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
