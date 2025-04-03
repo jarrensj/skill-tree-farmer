@@ -18,6 +18,14 @@ interface NodesDisplayProps {
   skillTreeSlug: string;
 }
 
+const pulsingBlue = `
+  @keyframes pulseBlue {
+    0% { border-color: #3B82F6; }
+    50% { border-color: #60A5FA; }
+    100% { border-color: #3B82F6; }
+  }
+`;
+
 export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps) {
   const [unlockedNodes, setUnlockedNodes] = React.useState<Set<string>>(new Set());
   const [loading, setLoading] = React.useState(true);
@@ -140,6 +148,9 @@ export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps
 
   return (
     <div className="flex">
+      {/* Add the keyframes style */}
+      <style>{pulsingBlue}</style>
+
       <div className={`fixed left-0 top-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50 
         ${isSliderOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {selectedNode && (
@@ -231,6 +242,7 @@ export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps
             
             const isUnlocked = unlockedNodes.has(node.node_identifier);
             const isAvailable = canUnlock(node);
+            const isSelected = selectedNode?.node_identifier === node.node_identifier;
             
             return (
               <div
@@ -244,15 +256,23 @@ export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps
                 <div 
                   onClick={() => handleNodeClick(node)}
                   className={`w-full h-full rounded-full border-2 
-                    ${isUnlocked 
-                      ? 'border-green-500 bg-white' 
-                      : isAvailable 
-                        ? 'border-yellow-500 bg-gray-100 cursor-pointer' 
-                        : 'border-gray-300 bg-gray-200'
+                    ${isSelected
+                      ? 'border-blue-500 animate-[pulseBlue_2s_ease-in-out_infinite]'
+                      : isUnlocked 
+                        ? 'border-green-500 bg-white' 
+                        : isAvailable 
+                          ? 'border-yellow-500 bg-gray-100 cursor-pointer' 
+                          : 'border-gray-300 bg-gray-200'
                     } 
                     hover:shadow-lg transition-all duration-300 p-2 
                     flex flex-col items-center justify-center 
                     ${isAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                  style={{
+                    ...(isSelected && {
+                      animation: 'pulseBlue 2s ease-in-out infinite',
+                      borderWidth: '3px'
+                    })
+                  }}
                 >
                   {node.image && (
                     <Image
