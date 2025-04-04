@@ -74,6 +74,22 @@ export async function POST(
       .eq('skill_tree_slug', skill_tree_slug)
       .single();
 
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('skill_trees')
+      .eq('clerk_id', userId)
+      .single();
+
+    if (userError && userError.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+      return NextResponse.json({ error: userError.message }, { status: 500 });
+    }
+
+    const userSkillTrees = userData?.skill_trees || [];
+    
+    const existingSkillTree = userSkillTrees.find(
+      (tree: { skill_tree_slug: string }) => tree.skill_tree_slug === skill_tree_slug
+    );
+
     if (existingProgress) {
       const updatedNodes = new Set([...existingProgress.nodes_unlocked, node_identifier]);
       const { error } = await supabase
@@ -100,9 +116,27 @@ export async function POST(
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     }
+    
+    if (!existingSkillTree) {
+      const currentSkillTrees = Array.isArray(userSkillTrees) ? userSkillTrees : [];
+      
+      const updatedSkillTrees = [
+        ...currentSkillTrees,
+        { skill_tree_slug, status: 'in_progress' }
+      ];
+      
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ skill_trees: updatedSkillTrees })
+        .eq('clerk_id', userId);
+
+      if (updateError) {
+        return NextResponse.json({ error: updateError.message }, { status: 500 });
+      }
+    }
 
     return NextResponse.json({ message: "Progress updated successfully" });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user progress:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
