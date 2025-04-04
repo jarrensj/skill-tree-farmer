@@ -2,13 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 
-// Use service role key for backend operations
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_KEY || "", // Use service role key instead of anon key
+  process.env.SUPABASE_SERVICE_KEY || "", 
 );
 
-// Get user progress for a specific skill tree
 export async function GET(
   request: NextRequest
 ) {
@@ -30,13 +28,12 @@ export async function GET(
       .select('*')
       .eq('user_id', userId)
       .eq('skill_tree_slug', skillTreeSlug)
-      .maybeSingle(); // Use maybeSingle() instead of single()
+      .maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // If no progress exists yet, return an empty progress object
     if (!data) {
       return NextResponse.json({ 
         progress: {
@@ -54,7 +51,6 @@ export async function GET(
   }
 }
 
-// Update user progress
 export async function POST(
   request: NextRequest
 ) {
@@ -71,7 +67,6 @@ export async function POST(
       return NextResponse.json({ error: "skill_tree_slug and node_identifier are required" }, { status: 400 });
     }
 
-    // First, try to get existing progress
     const { data: existingProgress } = await supabase
       .from('user_progress')
       .select('*')
@@ -80,7 +75,6 @@ export async function POST(
       .single();
 
     if (existingProgress) {
-      // Update existing progress
       const updatedNodes = new Set([...existingProgress.nodes_unlocked, node_identifier]);
       const { error } = await supabase
         .from('user_progress')
@@ -94,7 +88,6 @@ export async function POST(
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     } else {
-      // Create new progress record
       const { error } = await supabase
         .from('user_progress')
         .insert({
