@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 interface Node {
@@ -34,28 +34,29 @@ export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps
   const [selectedNode, setSelectedNode] = React.useState<Node | null>(null);
   const [isSliderOpen, setIsSliderOpen] = React.useState(false);
 
-  useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const response = await fetch(`/api/user-progress?skill_tree_slug=${skillTreeSlug}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch progress');
-        }
-        const data = await response.json();
-        if (data.progress?.nodes_unlocked) {
-          setUnlockedNodes(new Set(data.progress.nodes_unlocked));
-        }
-      } catch (error) {
-        console.error('Error fetching user progress:', error);
-        setError(error instanceof Error ? error.message : 'Failed to fetch progress');
-      } finally {
-        setLoading(false);
+  const fetchProgress = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/user-progress?skill_tree_slug=${skillTreeSlug}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch progress');
       }
-    };
-
-    fetchProgress();
+      const data = await response.json();
+      if (data.progress?.nodes_unlocked) {
+        setUnlockedNodes(new Set(data.progress.nodes_unlocked));
+      }
+    } catch (error) {
+      console.error('Error fetching user progress:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch progress');
+    } finally {
+      setLoading(false);
+    }
   }, [skillTreeSlug]);
+
+  useEffect(() => {
+    fetchProgress();
+  }, [fetchProgress]);
 
   // check if a node can be unlocked
   const canUnlock = (node: Node) => {
@@ -92,7 +93,34 @@ export default function NodesDisplay({ nodes, skillTreeSlug }: NodesDisplayProps
         throw new Error(data.error || 'Failed to update progress');
       }
 
-      setUnlockedNodes(prev => new Set([...prev, node.node_identifier]));
+      const updatedUnlockedNodes = new Set([...unlockedNodes, node.node_identifier]);
+      setUnlockedNodes(updatedUnlockedNodes);
+
+      const allNodesCompleted = nodes.every(n => updatedUnlockedNodes.has(n.node_identifier));
+      
+      if (allNodesCompleted) {
+        try {
+          const updateResponse = await fetch('/api/user-skill-trees', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              skill_tree_slug: skillTreeSlug,
+              status: 'completed',
+            }),
+          });
+          
+          if (!updateResponse.ok) {
+            const errorData = await updateResponse.json();
+            console.error('Failed to update skill tree status:', errorData.error);
+          } else {
+            window.location.reload();
+          }
+        } catch (updateError) {
+          console.error('Error updating skill tree status:', updateError);
+        }
+      }
     } catch (error) {
       console.error('Error updating progress:', error);
       setError(error instanceof Error ? error.message : 'Failed to update progress');
